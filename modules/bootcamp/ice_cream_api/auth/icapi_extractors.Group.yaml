@@ -63,3 +63,8 @@ capabilities:
       actions: [READ, WRITE]
       scope:
         all: {}
+  - assetsAcl:
+      actions: [READ, WRITE]
+      scope:
+        datasetScope:
+          ids: [{{ icapi_ds_external_id }}]
