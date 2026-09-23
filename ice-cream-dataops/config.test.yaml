@@ -1,36 +1,135 @@
-environment:
-  name: test # prod, staging, dev, test, qa
-  project: cdf-bootcamp-60-test # ex. cdf-bootcamp-01-test
-  validation-type: dev # prod, staging, dev, test, qa
-  selected:
-    - modules/bootcamp/data_foundation
-    - modules/bootcamp/ice_cream_api
-    - modules/bootcamp/use_cases/oee
+# ============================================================================
+# config.test.yaml — Cognite Data Fusion Toolkit environment configuration
+# ============================================================================
+# This file tells the CDF Toolkit (the `cdf` CLI) everything it needs to know
+# about ONE specific environment: which CDF project to deploy into, which
+# modules (folders of resource definitions) to include in the build, and
+# which values should be substituted into the {{ variable }} placeholders
+# found inside those modules' YAML files.
+#
+# The Toolkit picks this file up automatically when `default_env = "test"`
+# is set in cdf.toml, or explicitly via `cdf build --env test` /
+# `cdf deploy --env test`. A project can hold several of these side by side
+# (config.test.yaml, config.prod.yaml, config.staging.yaml, ...), each one
+# describing a different target environment while sharing the same modules.
+# ============================================================================
 
+environment:
+  # The label/identity of this environment. This is what the Toolkit uses to
+  # find this file (via --env test) and what shows up in logs/output. It is
+  # just a name — it does NOT by itself control how strict validation is
+  # (that's the separate `validation-type` field below).
+  name: test # prod, staging, dev, test, qa
+
+  # The actual CDF project (workspace) this environment deploys into. This
+  # must match a real project name that exists in your CDF cluster — it is
+  # NOT the same thing as the Entra ID tenant. Also referenced as
+  # ${CDF_PROJECT} inside the .env file used by the Hosted Extractor module.
+  project: cdf-bootcamp-60-test # ex. cdf-bootcamp-01-test
+
+  # Controls how strict the Toolkit's build/deploy VALIDATION rules are —
+  # independent from `name` above. "dev" is the most permissive level (fewer
+  # hard failures, more warnings tolerated); "prod"/"staging" enforce
+  # stricter checks, since mistakes there are more costly. It's normal for
+  # a training/bootcamp "test" environment to still use "dev"-level
+  # validation so learners aren't blocked by strict rules while practicing.
+  validation-type: staging # prod, staging, dev, test, qa
+
+  # The list of modules (folders under modules/) that will actually be
+  # built and deployed for this environment. A module NOT listed here is
+  # simply skipped, even if it physically exists in the repository — this
+  # is how you can have modules "on disk" that aren't part of a given
+  # environment's deployment yet (e.g. a module still under development).
+  selected:
+    - modules/bootcamp/data_foundation   # Groups, Data Sets, RAW, spaces — the access/foundation layer
+    - modules/bootcamp/ice_cream_api     # Hosted Extractors + the icapi_datapoints_extractor Function
+    - modules/bootcamp/use_cases/oee     # The oee_timeseries Function and its OEE calculation output
+
+# ----------------------------------------------------------------------------
+# Variable values substituted into every {{ variable }} placeholder found in
+# the YAML resource files under the modules selected above. The structure
+# here (modules -> bootcamp -> <module_name> -> <variable>) mirrors the
+# folder structure of the modules themselves, so it's easy to tell which
+# variable belongs to which module.
+#
+# A value wrapped in ${...} (e.g. ${DATA_DEVELOPER_SOURCE_ID}) is NOT a
+# literal string — it tells the Toolkit "read this value from the matching
+# environment variable", which in local development comes from the local
+# .env file (loaded automatically from the project root or a parent
+# directory). This keeps real secrets and per-environment IDs out of this
+# YAML file entirely, so config.test.yaml is safe to commit to Git even
+# though it drives which credentials get used.
+# ----------------------------------------------------------------------------
 variables:
   modules:
     bootcamp:
-      # Variables shared by modules
+      # --- Variables shared across more than one module ---------------------
+      # External ID of the Data Set used by the ICAPI (Ice Cream API) module.
       icapi_ds_external_id: ds_icapi
+      # Name of the Data Modeling space where ICAPI-related nodes/edges live
+      # (written to by the Hosted Extractors and by icapi_datapoints_extractor).
       icapi_space_name: icapi_dm_space
 
+      # --- data_foundation module --------------------------------------------
       data_foundation:
+        # Bridges the "bootcamp-60-test-data-developer" Entra ID Group to the
+        # data_developer CDF Group, via the Group's `sourceId` field. Anyone
+        # who is a member of that Entra ID group automatically inherits the
+        # data_developer permissions inside this CDF project.
         data_developer_source_id: ${DATA_DEVELOPER_SOURCE_ID}
 
+      # --- ice_cream_api module -----------------------------------------------
       ice_cream_api:
+        # Bridges the "bootcamp-60-test-icapi-extractors" Entra ID Group to
+        # the icapi_extractors CDF Group (same sourceId mechanism as above).
         icapi_extractors_source_id: ${ICAPI_EXTRACTORS_SOURCE_ID}
+
+        # OAuth2 token endpoint URL used by the Hosted Extractor's Destination
+        # to request access tokens from the identity provider (Entra ID).
         tokenUri: ${IDP_TOKEN_URL}
+
+        # The CDF project name, injected here again so the Hosted Extractor's
+        # Destination config knows which CDF project to write into — same
+        # value as `environment.project` above, but exposed as a variable so
+        # module YAML files can reference it directly.
         cdfProjectName: ${CDF_PROJECT}
+
+        # OAuth2 scopes requested when authenticating — defines what the
+        # resulting access token is allowed to be used for.
         scopes: ${IDP_SCOPES}
+
+        # Client ID used to manually trigger/run the extraction (e.g. via
+        # `cdf run` or a scheduled Job) — same Service Principal as the
+        # extractors below, exposed under its own variable name for the
+        # trigger/Job configuration specifically.
         icapi_trigger_client_id: ${ICAPI_EXTRACTORS_CLIENT_ID}
+        # Matching Client Secret for the trigger identity above.
         icapi_trigger_client_secret: ${ICAPI_EXTRACTORS_CLIENT_SECRET}
+
+        # Client ID of the "bootcamp-60-test-icapi-extractors-app" Service
+        # Principal — the identity actually used by the Hosted Extractors'
+        # Destination and by the icapi_datapoints_extractor Function to
+        # authenticate against CDF (write to RAW / icapi_dm_space).
         icapi_extractors_client_id: ${ICAPI_EXTRACTORS_CLIENT_ID}
+        # Matching Client Secret for the icapi-extractors-app identity.
         icapi_extractors_client_secret: ${ICAPI_EXTRACTORS_CLIENT_SECRET}
 
+      # --- use_cases/oee module -----------------------------------------------
       use_cases:
         oee:
+          # Bridges the "bootcamp-60-test-data-pipeline-oee" Entra ID Group
+          # to the data_pipeline_oee CDF Group via sourceId.
           data_pipeline_oee_source_id: ${DATA_PIPELINE_OEE_SOURCE_ID}
+          # External ID of the Data Set that stores the OEE use case's
+          # resources/lineage tracking.
           uc_oee_ds_external_id: ds_uc_oee
+          # Name of the Data Modeling space where the calculated OEE time
+          # series (quality, performance, availability, oee) are written to
+          # by the oee_timeseries Function.
           oee_space_name: oee_ts_space
+          # Client ID of the "bootcamp-60-test-data-pipeline-oee-app" Service
+          # Principal — the identity used by the oee_timeseries Function to
+          # read from icapi_dm_space and write into oee_ts_space.
           data_pipeline_oee_client_id: ${DATA_PIPELINE_OEE_CLIENT_ID}
+          # Matching Client Secret for the data-pipeline-oee-app identity.
           data_pipeline_oee_client_secret: ${DATA_PIPELINE_OEE_CLIENT_SECRET}

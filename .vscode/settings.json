@@ -1,3 +1,16 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "files.associations": {
+        "*.Transformation.sql": "plaintext"
+    },
+    "favorites.resources": [
+        {
+            "filePath": "ice-cream-dataops\\modules\\bootcamp\\data_foundation\\auth\\data_developer.Group.yaml",
+            "group": "Default"
+        },
+        {
+            "filePath": "ice-cream-dataops\\modules\\bootcamp\\ice_cream_api\\auth\\icapi_extractors.Group.yaml",
+            "group": "Default"
+        }
+    ]
 }
