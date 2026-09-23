@@ -99,6 +99,13 @@ def handle(client: CogniteClient, data: Dict[str, Any] = {}) -> None:
         for f in futures:
             f.result()
 
+def _to_epoch_ms(ts):
+    """Handles both the old (list-of-datetime) and new (plain datetime)
+    shapes of dp.timestamp returned by different cognite-sdk versions."""
+    if isinstance(ts, list):
+        ts = ts[0]
+    return int(ts.timestamp() * 1000) if hasattr(ts, "timestamp") else ts
+
 def process_site(client, lookback_minutes, site):
     oee_space = "oee_ts_space"
     source_space = "icapi_dm_space"
@@ -121,7 +128,7 @@ def process_site(client, lookback_minutes, site):
         status_node = f"NodeId({source_space}, {asset}:status)"
         planned_status_node = f"NodeId({source_space}, {asset}:planned_status)"
 
-        end = min([dp.timestamp[0] for dp in latest_dps if latest_dps and dp.timestamp], default=None)
+        end = min([_to_epoch_ms(dp.timestamp) for dp in latest_dps if latest_dps and dp.timestamp], default=None)
 
         if end:
             dps_df = client.time_series.data.retrieve_dataframe(
