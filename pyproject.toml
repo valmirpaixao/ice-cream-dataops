@@ -1,3 +1,12 @@
+# ============================================================================
+# pyproject.toml — Poetry project definition for ice-cream-dataops
+# ============================================================================
+# Poetry uses this file (together with poetry.lock) to know exactly which
+# Python packages this project needs, and to create/manage the isolated
+# virtual environment the CDF Toolkit runs inside (that's what "poetry run
+# cdf ..." actually activates before running the cdf command).
+# ============================================================================
+
 [project]
 name = "ice-cream-dataops"
 version = "0.1.0"
@@ -6,14 +15,25 @@ authors = [
     {name = "valmirpaixao",email = "valmirpaixao@valmirpaixao.com"}
 ]
 readme = "README.md"
+# Minimum Python version required — must be compatible with the version
+# baked into the Dev Container image (python:3.11, see devcontainer.json).
 requires-python = "^3.11"
+# The actual runtime dependency of this project: the Cognite Toolkit itself,
+# pinned to an EXACT version (==0.6.53) rather than a range. Pinning avoids
+# the CLI's behavior/commands silently changing between bootcamp sessions.
 dependencies = [
     "cognite-toolkit (==0.6.53)"
 ]
 
 [tool.poetry]
+# "package-mode = false" tells Poetry this is NOT a Python package meant to
+# be built/published (no importable library code here) — it's just a
+# project that uses Poetry to manage its own tooling dependencies.
 package-mode = false
 
 [build-system]
+# Standard Poetry build backend declaration — required boilerplate so that
+# tools inspecting this file know how it should be built, even though
+# package-mode = false means nothing actually gets built/published here.
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

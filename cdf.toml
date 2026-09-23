@@ -1,5 +1,23 @@
+# ============================================================================
+# cdf.toml — Cognite Data Fusion Toolkit project-level configuration
+# ============================================================================
+# This file is NOT per-environment (unlike config.test.yaml / config.prod.yaml
+# etc.). It describes the project as a whole: where the actual modules/config
+# live on disk, which environment to use by default, and which optional CLI
+# features (plugins) are turned on.
+# ============================================================================
+
 [cdf]
-default_organization_dir = "ice-cream-dataops"
+# The folder (relative to this file) that the Toolkit treats as the actual
+# "organization directory" — i.e. where it looks for config.<env>.yaml files
+# and the modules/ folder. This is why config.test.yaml and modules/ live one
+# level deeper, inside ./ice-cream-dataops/, instead of next to this file.
+default_organization_dir = "."
+
+# Which environment (config.<env>.yaml) the Toolkit uses when a command is
+# run WITHOUT an explicit --env flag (e.g. plain `cdf build`). Today only
+# config.test.yaml exists, so every command implicitly targets "test" unless
+# --env is passed explicitly.
 default_env = "test"
 
 [modules]
@@ -9,6 +27,9 @@ version = "0.6.53"
 
 
 [plugins]
-run = true
-pull = false
-dump = false
+# Toggles optional Toolkit CLI subcommands/features on or off for this
+# project. A plugin set to false is effectively hidden — its command won't
+# show up in `cdf --help` and can't be used.
+run = true    # Enables `cdf run` — manually trigger Functions/Transformations from the CLI.
+pull = false  # Disables `cdf pull` — pulling live CDF resource state back down into local YAML.
+dump = false  # Disables `cdf dump` — dumping/exporting existing CDF resources to disk.

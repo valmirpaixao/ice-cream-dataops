@@ -1,6 +1,17 @@
 {
+  // Base image: an official Microsoft-maintained image with Linux + Python
+  // 3.11 already installed. Using a pre-built image means every learner
+  // gets the exact same OS/Python setup, regardless of their own Windows/
+  // Mac/Linux machine ("works on my machine" problem eliminated).
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
+
+  // Additional installable "add-ons" layered on top of the base image after
+  // the container is created. Each feature is a small, independently
+  // maintained installer script.
   "features": {
+    // Installs Poetry (the dependency/venv manager this project's
+    // pyproject.toml + poetry.lock rely on) inside the container.
+    // The empty {} means "use this feature's default options".
     "ghcr.io/devcontainers-extra/features/poetry:2": {}
   }
 }

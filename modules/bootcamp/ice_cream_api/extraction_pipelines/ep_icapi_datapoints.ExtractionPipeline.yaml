@@ -1,0 +1,5 @@
+externalId: ep_icapi_datapoints
+name: Ice Cream API DataPoints Extractor
+dataSetExternalId: {{ icapi_ds_external_id }}
+description: Extracts DataPoints data from the Ice Cream API via the icapi_datapoints_extractor Cognite Function
+source: Ice Cream API

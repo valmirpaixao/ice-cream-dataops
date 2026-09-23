@@ -1,3 +1,14 @@
+# ============================================================================
+# .gitignore — standard Python project ignore list (auto-generated template,
+# e.g. from gitignore.io / GitHub's Python.gitignore), with two bootcamp-
+# specific entries worth calling out:
+#   - "build/" (further down, under Distribution/packaging) also happens to
+#     match the Cognite Toolkit's OWN generated output folder (build/), so
+#     it never gets committed — correct, since `cdf build` regenerates it.
+#   - ".env" (further down, under Environments) is what keeps your real
+#     Client IDs/Secrets out of Git — never remove this line.
+# ============================================================================
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

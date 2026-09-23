@@ -1,8 +1,20 @@
 {
+    // Tells the VS Code Python extension to use the system-level Python
+    // environment manager rather than auto-creating/managing its own venv —
+    // Poetry (via the Dev Container) is what actually manages the venv here.
     "python-envs.defaultEnvManager": "ms-python.python:system",
+
+    // Cognite Toolkit Transformation SQL files use a ".Transformation.sql"
+    // double extension. Without this override, VS Code might try to apply
+    // full SQL language features/linting to them; "plaintext" keeps syntax
+    // highlighting simple and avoids false-positive SQL errors.
     "files.associations": {
         "*.Transformation.sql": "plaintext"
     },
+
+    // Quick-access shortcuts (via the "Favorites" extension) pinning the two
+    // most frequently edited Group.yaml files (access/permission definitions)
+    // for fast navigation while working through the bootcamp exercises.
     "favorites.resources": [
         {
             "filePath": "ice-cream-dataops\\modules\\bootcamp\\data_foundation\\auth\\data_developer.Group.yaml",
