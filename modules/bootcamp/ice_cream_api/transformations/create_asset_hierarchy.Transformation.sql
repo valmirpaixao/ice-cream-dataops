@@ -5,8 +5,8 @@ select
   if(
       `parent_external_id` == ''
       OR `parent_external_id` == null,
-      '',
-      `parent_external_id`
-  ) as parentExternalId
+      null,
+      node_reference('icapi_dm_space', `parent_external_id`)
+  ) as parent
 from
   `ice-cream-factory-db`.`assets`
