@@ -1,0 +1,8 @@
+- name: OEE TimeSeries Calculator
+  externalId: oee_timeseries
+  owner: Bootcamp Team
+  description: Calculates Overall Equipment Effectiveness (OEE) metrics from Ice Cream API datapoints
+  metadata:
+    version: "1.0"
+  runtime: py311
+  functionPath: ./handler.py
