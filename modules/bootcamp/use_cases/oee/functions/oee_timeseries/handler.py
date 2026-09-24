@@ -123,10 +123,10 @@ def process_site(client, lookback_minutes, site):
 
     for asset, latest_dps in assets_dps.items():
         print(f"Calculating OEE for {asset}")
-        count_node = f"NodeId({source_space}, {asset}:count)"
-        good_node = f"NodeId({source_space}, {asset}:good)"
-        status_node = f"NodeId({source_space}, {asset}:status)"
-        planned_status_node = f"NodeId({source_space}, {asset}:planned_status)"
+        count_node = f"{asset}:count"
+        good_node = f"{asset}:good"
+        status_node = f"{asset}:status"
+        planned_status_node = f"{asset}:planned_status"
 
         end = min([_to_epoch_ms(dp.timestamp) for dp in latest_dps if latest_dps and dp.timestamp], default=None)
 
