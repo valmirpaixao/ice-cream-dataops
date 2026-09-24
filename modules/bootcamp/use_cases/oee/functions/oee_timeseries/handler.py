@@ -123,10 +123,10 @@ def process_site(client, lookback_minutes, site):
 
     for asset, latest_dps in assets_dps.items():
         print(f"Calculating OEE for {asset}")
-        count_node = f"{asset}:count"
-        good_node = f"{asset}:good"
-        status_node = f"{asset}:status"
-        planned_status_node = f"{asset}:planned_status"
+        count_node = f"NodeId({source_space}, {asset}:count)"
+        good_node = f"NodeId({source_space}, {asset}:good)"
+        status_node = f"NodeId({source_space}, {asset}:status)"
+        planned_status_node = f"NodeId({source_space}, {asset}:planned_status)"
 
         end = min([_to_epoch_ms(dp.timestamp) for dp in latest_dps if latest_dps and dp.timestamp], default=None)
 
@@ -148,7 +148,7 @@ def process_site(client, lookback_minutes, site):
             try:
                 first_valid_value = dps_df[planned_status_node].loc[dps_df[planned_status_node].first_valid_index()]
             except Exception as e:
-                print(f"Failed to find datapoints for {planned_status_node}, {e}")
+                print(f"Failed to find datapoints for {planned_status_node}, {e}. Available columns: {list(dps_df.columns)}")
                 continue
 
             backfill_value = 1.0 if first_valid_value == 0.0 else 0.0
