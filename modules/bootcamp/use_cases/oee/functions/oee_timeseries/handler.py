@@ -123,10 +123,17 @@ def process_site(client, lookback_minutes, site):
 
     for asset, latest_dps in assets_dps.items():
         print(f"Calculating OEE for {asset}")
-        count_node = f"NodeId({source_space}, {asset}:count)"
-        good_node = f"NodeId({source_space}, {asset}:good)"
-        status_node = f"NodeId({source_space}, {asset}:status)"
-        planned_status_node = f"NodeId({source_space}, {asset}:planned_status)"
+
+        # retrieve_dataframe(instance_id=...) labels its columns with the
+        # actual NodeId objects passed in as instance_id — NOT with a
+        # string, and NOT with any hand-formatted "NodeId(...)" repr. These
+        # must be real NodeId instances so they compare equal to dps_df's
+        # column labels (a plain string here always raises KeyError, even
+        # if it happens to *look* like the NodeId's repr).
+        count_node = NodeId(space=source_space, external_id=f"{asset}:count")
+        good_node = NodeId(space=source_space, external_id=f"{asset}:good")
+        status_node = NodeId(space=source_space, external_id=f"{asset}:status")
+        planned_status_node = NodeId(space=source_space, external_id=f"{asset}:planned_status")
 
         end = min([_to_epoch_ms(dp.timestamp) for dp in latest_dps if latest_dps and dp.timestamp], default=None)
 
@@ -155,7 +162,12 @@ def process_site(client, lookback_minutes, site):
             dps_df[planned_status_node] = dps_df[planned_status_node].fillna(value=backfill_value)
 
             # Same for status
-            first_valid_value = dps_df[status_node].loc[dps_df[status_node].first_valid_index()]
+            try:
+                first_valid_value = dps_df[status_node].loc[dps_df[status_node].first_valid_index()]
+            except Exception as e:
+                print(f"Failed to find datapoints for {status_node}, {e}. Available columns: {list(dps_df.columns)}")
+                continue
+
             backfill_value = 1.0 if first_valid_value == 0.0 else 0.0
             dps_df[status_node] = dps_df[status_node].fillna(value=backfill_value)
 
